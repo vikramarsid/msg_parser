@@ -1,0 +1,4 @@
+# msg_parser requirements
+
+olefile>=0.46
+
