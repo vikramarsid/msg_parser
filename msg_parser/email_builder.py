@@ -35,15 +35,15 @@ class EmailFormatter(object):
         if from_address:
             self.message['From'] = from_address
 
-        to_address = flatten_list(self.msg_obj.header.get("To"))
+        to_address = flatten_list(self.msg_obj.header_dict.get("To"))
         if to_address:
             self.message['To'] = to_address
 
-        cc_address = flatten_list(self.msg_obj.header.get("CC"))
+        cc_address = flatten_list(self.msg_obj.header_dict.get("CC"))
         if cc_address:
             self.message['CC'] = cc_address
 
-        bcc_address = flatten_list(self.msg_obj.header.get("BCC"))
+        bcc_address = flatten_list(self.msg_obj.header_dict.get("BCC"))
         if bcc_address:
             self.message['BCC'] = bcc_address
 

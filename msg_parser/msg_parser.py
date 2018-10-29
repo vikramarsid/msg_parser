@@ -365,40 +365,44 @@ class MsOxMessage(object):
 
         # setting generally required properties to easily access using MsOxMessage instance.
         self.subject = property_values.get("Subject")
-        self.header = parse_email_headers(property_values.get("TransportMessageHeaders")) or {}
+
+        header = property_values.get("TransportMessageHeaders")
+        self.header = parse_email_headers(header, True)
+        self.header_dict = parse_email_headers(header) or {}
+
         self.created_date = property_values.get("CreationTime")
         self.received_date = property_values.get("ReceiptTime")
 
         sent_date = property_values.get("DeliverTime")
         if not sent_date:
-            sent_date = self.header.get("Date")
+            sent_date = self.header_dict.get("Date")
         self.sent_date = sent_date
 
-        sender_address = self.header.get("From")
+        sender_address = self.header_dict.get("From")
         if not sender_address:
             sender_address = property_values.get("SenderRepresentingSmtpAddress")
         self.sender = sender_address
 
-        reply_to_address = self.header.get("Reply-To")
+        reply_to_address = self.header_dict.get("Reply-To")
         if not reply_to_address:
             reply_to_address = property_values.get("ReplyRecipientNames")
         self.reply_to = reply_to_address
 
         self.message_id = property_values.get("InternetMessageId")
 
-        to_address = self.header.get("TO")
+        to_address = self.header_dict.get("TO")
         if not to_address:
             to_address = property_values.get("DisplayTo")
             if not to_address:
                 to_address = property_values.get("ReceivedRepresentingSmtpAddress")
         self.to = to_address
 
-        cc_address = self.header.get("CC")
+        cc_address = self.header_dict.get("CC")
         # if cc_address:
         #     cc_address = [CONTROL_CHARS.sub(" ", cc_add) for cc_add in cc_address.split(",")]
         self.cc = cc_address
 
-        bcc_address = self.header.get("BCC")
+        bcc_address = self.header_dict.get("BCC")
         self.bcc = bcc_address
 
         # prefer HTMl over plain text
@@ -459,23 +463,27 @@ def format_size(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
-def parse_email_headers(header):
+def parse_email_headers(header, raw=False):
     if not header:
         return None
-    email_address_heders = {
+
+    headers = email.message_from_string(header)
+    if raw:
+        return headers
+
+    email_address_headers = {
         "To": [],
         "From": [],
         "CC": [],
         "BCC": [],
         "Reply-To": [],
     }
-    headers = email.message_from_string(header)
 
-    for addr in email_address_heders.keys():
+    for addr in email_address_headers.keys():
         for (name, email_address) in email.utils.getaddresses(headers.get_all(addr, [])):
-            email_address_heders[addr].append("{} <{}>".format(name, email_address))
+            email_address_headers[addr].append("{} <{}>".format(name, email_address))
 
     parsed_headers = dict(headers)
-    parsed_headers.update(email_address_heders)
+    parsed_headers.update(email_address_headers)
 
     return parsed_headers
