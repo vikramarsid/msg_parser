@@ -21,9 +21,9 @@
 import os
 import sys
 
-from msg_parser import __version__ as msg_parser
-
 sys.path.insert(0, os.path.abspath('..'))
+
+from msg_parser import __version__ as msg_parser
 
 # -- General configuration ---------------------------------------------
 
