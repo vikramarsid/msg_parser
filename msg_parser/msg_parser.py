@@ -4,10 +4,10 @@
 # ref: https://blogs.msdn.microsoft.com/openspecification/2010/06/20/msg-file-format-rights-managed-email-message-part-2/
 # ref: https://msdn.microsoft.com/en-us/library/cc463912(v=EXCHG.80).aspx
 import email
-import json
 import os
 import re
 from struct import unpack
+from pickle import dumps
 
 from olefile import OleFileIO, isOleFile
 
@@ -343,10 +343,8 @@ class MsOxMessage(object):
                     if not isinstance(attachment, dict):
                         continue
                     attachment["AttachDataObject"] = {}
-            json_string = json.dumps(
-                self._message_dict, skipkeys=True,
-                ensure_ascii=False, encoding="latin-1",
-                indent=4)
+            # Using Pickle to encode message. There is bytes-like objects in it. Therefore cannot be treated by embed json.dumps method
+            json_string = dumps(self._message_dict)
             return json_string
         except ValueError:
             return None
@@ -410,6 +408,11 @@ class MsOxMessage(object):
             self.body = property_values.get("Html")
         else:
             self.body = property_values.get("Body")
+
+        # Trying to decode body if is bytes obj. This is not the way to go. Quick-fix only.
+        # See IMAP specs. Use charset-normalizer, cchardet or chardet as last resort.
+        if isinstance(self.body, bytes):
+            self.body = self.body.decode('utf-8', 'ignore')
 
         if not self.body and "RtfCompressed" in property_values:
             try:
