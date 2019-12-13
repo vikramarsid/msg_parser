@@ -2,4 +2,4 @@
 
 """Top-level package for msg_parser."""
 
-from msg_parser import MsOxMessage
+from .msg_parser import MsOxMessage

@@ -72,7 +72,8 @@ class EmailFormatter(object):
 
         # Optional attachments
         attachments = self.msg_obj.attachments
-        if attachments:
+        if len(attachments) > 0:
+            # Some issues here, where data is None or is bytes-like object.
             self._process_attachments(self.msg_obj.attachments)
 
         # composed email
@@ -89,7 +90,7 @@ class EmailFormatter(object):
         eml_file_path = os.path.join(file_path, file_name)
 
         with codecs.open(eml_file_path, mode="wb+", encoding="utf-8") as eml_file:
-            eml_file.write(eml_content.decode("utf-8"))
+            eml_file.write(eml_content)
 
         return eml_file_path
 
@@ -99,6 +100,12 @@ class EmailFormatter(object):
             data = attachment.data
             filename = attachment.Filename
             maintype, subtype = ctype.split('/', 1)
+
+            if data is None:
+                continue
+
+            if isinstance(data, bytes):
+                data = data.decode('utf-8', 'ignore')
 
             if maintype == 'text' or "message" in maintype:
                 attach = MIMEText(data, _subtype=subtype)
@@ -136,8 +143,8 @@ def normalize(input_str):
             input_str.decode('ascii')
         return input_str
     except UnicodeError:
-        if not isinstance(input_str, unicode):
-            input_str = str(input_str).decode("utf-8", "replace")
+        if isinstance(input_str, bytes):
+            input_str = input_str.decode("utf-8", "ignore")
         normalized = unicodedata.normalize('NFKD', input_str)
         if not normalized.strip():
             normalized = input_str.encode('unicode-escape').decode('utf-8')
