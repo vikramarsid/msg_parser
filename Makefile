@@ -95,3 +95,12 @@ tidy: clean ## Run all formatting changes
 	autoflake --in-place --remove-all-unused-imports --ignore-init-module-imports -r msg_parser
 	flake8
 	black -t py37 --verbose msg_parser
+
+bumpversion_patch: clean ## bump patch version
+	@bumpversion patch --allow-dirty
+
+bumpversion_minor: clean ## bump minor version
+	@bumpversion minor --allow-dirty
+
+bumpversion_major: clean ## bump major version
+	@bumpversion major --allow-dirty
