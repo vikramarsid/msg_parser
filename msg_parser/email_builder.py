@@ -15,7 +15,7 @@ class EmailFormatter(object):
     def __init__(self, msg_object):
         self.msg_obj = msg_object
         self.message = MIMEMultipart()
-        self.message.set_charset('utf-8')
+        self.message.set_charset("utf-8")
 
     def build_email(self):
 
@@ -23,44 +23,44 @@ class EmailFormatter(object):
         self.message.set_param("Message-ID", self.msg_obj.message_id)
 
         # Encoding for unicode subject
-        self.message['Subject'] = Header(self.msg_obj.subject, charset='UTF-8')
+        self.message["Subject"] = Header(self.msg_obj.subject, charset="UTF-8")
 
         # Setting Date Time
         # Returns a date string as specified by RFC 2822, e.g.: Fri, 09 Nov 2001 01:08:47 -0000
-        self.message['Date'] = str(self.msg_obj.sent_date)
+        self.message["Date"] = str(self.msg_obj.sent_date)
 
         # At least one recipient is required
         # Required fromAddress
         from_address = flatten_list(self.msg_obj.sender)
         if from_address:
-            self.message['From'] = from_address
+            self.message["From"] = from_address
 
         to_address = flatten_list(self.msg_obj.header_dict.get("To"))
         if to_address:
-            self.message['To'] = to_address
+            self.message["To"] = to_address
 
         cc_address = flatten_list(self.msg_obj.header_dict.get("CC"))
         if cc_address:
-            self.message['CC'] = cc_address
+            self.message["CC"] = cc_address
 
         bcc_address = flatten_list(self.msg_obj.header_dict.get("BCC"))
         if bcc_address:
-            self.message['BCC'] = bcc_address
+            self.message["BCC"] = bcc_address
 
         # Add reply-to
         reply_to = flatten_list(self.msg_obj.reply_to)
         if reply_to:
-            self.message.add_header('reply-to', reply_to)
+            self.message.add_header("reply-to", reply_to)
         else:
-            self.message.add_header('reply-to', from_address)
+            self.message.add_header("reply-to", from_address)
 
         # Required Email body content
         body_content = self.msg_obj.body
         if body_content:
             if "<html>" in body_content:
-                body_type = 'html'
+                body_type = "html"
             else:
-                body_type = 'plain'
+                body_type = "plain"
 
             body = MIMEText(_text=body_content, _subtype=body_type, _charset="UTF-8")
             self.message.attach(body)
@@ -68,7 +68,7 @@ class EmailFormatter(object):
             raise KeyError("Missing email body")
 
         # Add message preamble
-        self.message.preamble = 'You will not see this in a MIME-aware mail reader.\n'
+        self.message.preamble = "You will not see this in a MIME-aware mail reader.\n"
 
         # Optional attachments
         attachments = self.msg_obj.attachments
@@ -85,7 +85,7 @@ class EmailFormatter(object):
 
         eml_content = self.build_email()
 
-        file_name = str(self.message['Subject']) + ".eml"
+        file_name = str(self.message["Subject"]) + ".eml"
 
         eml_file_path = os.path.join(file_path, file_name)
 
@@ -99,19 +99,19 @@ class EmailFormatter(object):
             ctype = attachment.AttachMimeTag
             data = attachment.data
             filename = attachment.Filename
-            maintype, subtype = ctype.split('/', 1)
+            maintype, subtype = ctype.split("/", 1)
 
             if data is None:
                 continue
 
             if isinstance(data, bytes):
-                data = data.decode('utf-8', 'ignore')
+                data = data.decode("utf-8", "ignore")
 
-            if maintype == 'text' or "message" in maintype:
+            if maintype == "text" or "message" in maintype:
                 attach = MIMEText(data, _subtype=subtype)
-            elif maintype == 'image':
+            elif maintype == "image":
                 attach = MIMEImage(data, _subtype=subtype)
-            elif maintype == 'audio':
+            elif maintype == "audio":
                 attach = MIMEAudio(data, _subtype=subtype)
             else:
                 attach = MIMEBase(maintype, subtype)
@@ -121,8 +121,10 @@ class EmailFormatter(object):
                 encoders.encode_base64(attach)
             # Set the filename parameter
             base_filename = os.path.basename(filename)
-            attach.add_header('Content-ID', '<{}>'.format(base_filename))
-            attach.add_header('Content-Disposition', 'attachment', filename=base_filename)
+            attach.add_header("Content-ID", "<{}>".format(base_filename))
+            attach.add_header(
+                "Content-Disposition", "attachment", filename=base_filename
+            )
             self.message.attach(attach)
 
 
@@ -138,15 +140,15 @@ def normalize(input_str):
         return input_str
     try:
         if isinstance(input_str, list):
-            input_str = [s.decode('ascii') for s in input_str]
+            input_str = [s.decode("ascii") for s in input_str]
         else:
-            input_str.decode('ascii')
+            input_str.decode("ascii")
         return input_str
     except UnicodeError:
         if isinstance(input_str, bytes):
             input_str = input_str.decode("utf-8", "ignore")
-        normalized = unicodedata.normalize('NFKD', input_str)
+        normalized = unicodedata.normalize("NFKD", input_str)
         if not normalized.strip():
-            normalized = input_str.encode('unicode-escape').decode('utf-8')
+            normalized = input_str.encode("unicode-escape").decode("utf-8")
 
         return normalized

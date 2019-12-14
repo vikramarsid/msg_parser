@@ -1,12 +1,12 @@
 # coding=utf-8
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from struct import unpack
 
 from .properties import DATA_TYPE_MAP
 
 
 class DataModel(object):
-
     def __init__(self):
         self.data_type_name = None
 
@@ -21,7 +21,9 @@ class DataModel(object):
         elif data_type:
             self.data_type_name = self.lookup_data_type_name(data_type)
         else:
-            raise Exception("required arguments not provided to the constructor of the class.")
+            raise Exception(
+                "required arguments not provided to the constructor of the class."
+            )
 
         if not hasattr(self, self.data_type_name):
             return None
@@ -34,24 +36,24 @@ class DataModel(object):
         return data_value
 
     @staticmethod
-    def PtypNull(data_value):
+    def PtypNull(_):
         return None
 
     @staticmethod
     def PtypInteger16(data_value):
-        return int(data_value.encode('hex'), 16)
+        return int(data_value.encode("hex"), 16)
 
     @staticmethod
     def PtypInteger32(data_value):
-        return int(data_value.encode('hex'), 32)
+        return int(data_value.encode("hex"), 32)
 
     @staticmethod
     def PtypFloating32(data_value):
-        return unpack('f', data_value)[0]
+        return unpack("f", data_value)[0]
 
     @staticmethod
     def PtypFloating64(data_value):
-        return unpack('d', data_value)[0]
+        return unpack("d", data_value)[0]
 
     @staticmethod
     def PtypCurrency(data_value):
@@ -63,32 +65,34 @@ class DataModel(object):
 
     @staticmethod
     def PtypErrorCode(data_value):
-        return unpack('I', data_value)[0]
+        return unpack("I", data_value)[0]
 
     @staticmethod
     def PtypBoolean(data_value):
-        return unpack('B', data_value[0])[0] != 0
+        return unpack("B", data_value[0])[0] != 0
 
     @staticmethod
     def PtypObject(data_value):
-        if data_value and b'\x00' in data_value:
-            data_value = data_value.replace(b'\x00', b'')
+        if data_value and b"\x00" in data_value:
+            data_value = data_value.replace(b"\x00", b"")
         return data_value
 
     @staticmethod
     def PtypInteger64(data_value):
-        return unpack('q', data_value)[0]
+        return unpack("q", data_value)[0]
 
     @staticmethod
     def PtypString8(data_value):
-        if data_value and b'\x00' in data_value:
-            data_value = data_value.replace(b'\x00', b'')
+        if data_value and b"\x00" in data_value:
+            data_value = data_value.replace(b"\x00", b"")
         return data_value
 
     @staticmethod
     def PtypString(data_value):
         if data_value:
-            data_value = data_value.decode("utf-16-le", errors="ignore").replace('\x00', '')
+            data_value = data_value.decode("utf-16-le", errors="ignore").replace(
+                "\x00", ""
+            )
         return data_value
 
     @staticmethod
@@ -113,30 +117,29 @@ class DataModel(object):
 
     @staticmethod
     def PtypBinary(data_value):
-        if data_value and b'\x00' in data_value:
-            data_value = data_value.replace(b'\x00', b'')
+        if data_value and b"\x00" in data_value:
+            data_value = data_value.replace(b"\x00", b"")
         return data_value
-
 
     @staticmethod
     def PtypMultipleInteger16(data_value):
-        entry_count = len(data_value) / 2
-        return [unpack('h', bytes[i * 2:(i + 1) * 2])[0] for i in range(entry_count)]
+        entry_count = int(len(data_value) / 2)
+        return [unpack("h", bytes[i * 2 : (i + 1) * 2])[0] for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleInteger32(data_value):
-        entry_count = len(data_value) / 4
-        return [unpack('i', bytes[i * 4:(i + 1) * 4])[0] for i in range(entry_count)]
+        entry_count = int(len(data_value) / 4)
+        return [unpack("i", bytes[i * 4 : (i + 1) * 4])[0] for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleFloating32(data_value):
-        entry_count = len(data_value) / 4
-        return [unpack('f', bytes[i * 4:(i + 1) * 4])[0] for i in range(entry_count)]
+        entry_count = int(len(data_value) / 4)
+        return [unpack("f", bytes[i * 4 : (i + 1) * 4])[0] for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleFloating64(data_value):
-        entry_count = len(data_value) / 8
-        return [unpack('d', bytes[i * 8:(i + 1) * 8])[0] for i in range(entry_count)]
+        entry_count = int(len(data_value) / 8)
+        return [unpack("d", bytes[i * 8 : (i + 1) * 8])[0] for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleCurrency(data_value):
@@ -144,13 +147,15 @@ class DataModel(object):
 
     @staticmethod
     def PtypMultipleFloatingTime(data_value):
-        entry_count = len(data_value) / 8
-        return [get_floating_time(bytes[i * 8:(i + 1) * 8]) for i in range(entry_count)]
+        entry_count = int(len(data_value) / 8)
+        return [
+            get_floating_time(bytes[i * 8 : (i + 1) * 8]) for i in range(entry_count)
+        ]
 
     @staticmethod
     def PtypMultipleInteger64(data_value):
-        entry_count = len(data_value) / 8
-        return [unpack('q', bytes[i * 8:(i + 1) * 8])[0] for i in range(entry_count)]
+        entry_count = int(len(data_value) / 8)
+        return [unpack("q", bytes[i * 8 : (i + 1) * 8])[0] for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleString(data_value):
@@ -168,13 +173,13 @@ class DataModel(object):
 
     @staticmethod
     def PtypMultipleTime(data_value):
-        entry_count = len(data_value) / 8
-        return [get_time(bytes[i * 8:(i + 1) * 8]) for i in range(entry_count)]
+        entry_count = int(len(data_value) / 8)
+        return [get_time(bytes[i * 8 : (i + 1) * 8]) for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleGuid(data_value):
-        entry_count = len(data_value) / 16
-        return [bytes[i * 16:(i + 1) * 16] for i in range(entry_count)]
+        entry_count = int(len(data_value) / 16)
+        return [bytes[i * 16 : (i + 1) * 16] for i in range(entry_count)]
 
     @staticmethod
     def PtypMultipleBinary(data_value):
@@ -182,28 +187,26 @@ class DataModel(object):
 
 
 def get_floating_time(data_value):
-    return datetime(
-        year=1899, month=12, day=30
-    ) + timedelta(
-        days=unpack('d', data_value)[0]
+    return datetime(year=1899, month=12, day=30) + timedelta(
+        days=unpack("d", data_value)[0]
     )
 
 
 def get_time(data_value):
-    return datetime(
-        year=1601, month=1, day=1
-    ) + timedelta(
-        microseconds=unpack('q', data_value)[0] / 10.0
+    return datetime(year=1601, month=1, day=1) + timedelta(
+        microseconds=unpack("q", data_value)[0] / 10.0
     )
 
 
 def get_multi_value_offsets(data_value):
-    ul_count = unpack('I', data_value[:4])[0]
+    ul_count = unpack("I", data_value[:4])[0]
 
     if ul_count == 1:
         rgul_data_offsets = [8]
     else:
-        rgul_data_offsets = [unpack('Q', bytes[4 + i * 8:4 + (i + 1) * 8])[0] for i in range(ul_count)]
+        rgul_data_offsets = [
+            unpack("Q", bytes[4 + i * 8 : 4 + (i + 1) * 8])[0] for i in range(ul_count)
+        ]
 
     rgul_data_offsets.append(len(data_value))
 

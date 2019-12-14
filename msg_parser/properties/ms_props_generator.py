@@ -88,12 +88,17 @@ def generate_id_name_mapping(master_map):
     id_map = {}
     for prop in properties_list:
         if "property_id" in prop:
-            id_map[prop["property_id"]] = {"name": prop["name"], "data_type": prop["data_type"]}
+            id_map[prop["property_id"]] = {
+                "name": prop["name"],
+                "data_type": prop["data_type"],
+            }
 
     if id_map:
         with open(id_map_file_path, "wb+") as py_file:
             py_file.write(python_file_header)
-            py_file.write("PROPS_ID_MAP = {}".format(json.dumps(id_map, sort_keys=True, indent=4)))
+            py_file.write(
+                "PROPS_ID_MAP = {}".format(json.dumps(id_map, sort_keys=True, indent=4))
+            )
 
     return id_map
 
@@ -112,7 +117,11 @@ def generate_data_id_type_mapping(master_map):
     if id_map:
         with open(data_type_map_file_path, "wb+") as py_file:
             py_file.write(python_file_header)
-            py_file.write("DATA_TYPE_MAP = {}".format(json.dumps(id_map, sort_keys=True, indent=4)))
+            py_file.write(
+                "DATA_TYPE_MAP = {}".format(
+                    json.dumps(id_map, sort_keys=True, indent=4)
+                )
+            )
 
     return id_map
 

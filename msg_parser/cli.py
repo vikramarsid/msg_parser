@@ -3,7 +3,10 @@
 """Console script for msg_parser."""
 import os.path
 import sys
-from argparse import ArgumentParser, FileType, Action, ArgumentTypeError
+from argparse import Action
+from argparse import ArgumentParser
+from argparse import ArgumentTypeError
+from argparse import FileType
 from pprint import pprint
 
 from msg_parser import MsOxMessage
@@ -28,19 +31,28 @@ def is_dir(dir_name):
 def create_parser(args):
     parser = ArgumentParser(description="Microsoft Message Parser")
     parser.add_argument(
-        "-i", "--input", dest="input_file", required=True,
-        help="msg file path", metavar="FILE",
+        "-i",
+        "--input",
+        dest="input_file",
+        required=True,
+        help="msg file path",
+        metavar="FILE",
         type=FileType(),
     )
     parser.add_argument(
-        "-j", "--json",
+        "-j",
+        "--json",
         help="output parsed msg as json to console",
-        dest="json_output", action='store_true'
+        dest="json_output",
+        action="store_true",
     )
     parser.add_argument(
-        "-e", "--eml",
+        "-e",
+        "--eml",
         help="provide email file path to save as eml file.",
-        dest="eml_file", action=FullPaths, type=is_dir
+        dest="eml_file",
+        action=FullPaths,
+        type=is_dir,
     )
     return parser.parse_args(args)
 

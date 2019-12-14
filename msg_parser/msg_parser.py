@@ -6,10 +6,11 @@
 import email
 import os
 import re
-from struct import unpack
 from pickle import dumps
+from struct import unpack
 
-from olefile import OleFileIO, isOleFile
+from olefile import OleFileIO
+from olefile import isOleFile
 
 from .data_models import DataModel
 from .email_builder import EmailFormatter
@@ -19,7 +20,7 @@ TOP_LEVEL_HEADER_SIZE = 32
 RECIPIENT_HEADER_SIZE = 8
 ATTACHMENT_HEADER_SIZE = 8
 EMBEDDED_MSG_HEADER_SIZE = 24
-CONTROL_CHARS = re.compile(r'[\n\r\t]')
+CONTROL_CHARS = re.compile(r"[\n\r\t]")
 
 
 class Message(object):
@@ -41,25 +42,24 @@ class Message(object):
         returns message attributes as a python dictionary.
         :return: dict
         """
-        message_dict = {
-            "attachments": self.attachments,
-            "recipients": self.recipients
-        }
+        message_dict = {"attachments": self.attachments, "recipients": self.recipients}
         message_dict.update(self.properties)
         return message_dict
 
     def _set_property_stream_info(self, ole_file, header_size):
-        property_dir_entry = ole_file.openstream('__properties_version1.0')
+        property_dir_entry = ole_file.openstream("__properties_version1.0")
         version_stream_data = property_dir_entry.read()
 
         if not version_stream_data:
-            raise Exception("Invalid MSG file provided, 'properties_version1.0' stream data is empty.")
+            raise Exception(
+                "Invalid MSG file provided, 'properties_version1.0' stream data is empty."
+            )
 
         if version_stream_data:
 
             if header_size >= EMBEDDED_MSG_HEADER_SIZE:
 
-                properties_metadata = unpack('8sIIII', version_stream_data[:24])
+                properties_metadata = unpack("8sIIII", version_stream_data[:24])
                 if not properties_metadata or not len(properties_metadata) >= 5:
                     raise Exception("'properties_version1.0' stream data is corrupted.")
                 self.next_recipient_id = properties_metadata[1]
@@ -68,18 +68,16 @@ class Message(object):
                 self.attachment_count = properties_metadata[4]
 
             if (len(version_stream_data) - header_size) % 16 != 0:
-                raise Exception('Property Stream size less header is not exactly divisible by 16')
+                raise Exception(
+                    "Property Stream size less header is not exactly divisible by 16"
+                )
 
             self.property_entries_count = (len(version_stream_data) - header_size) / 16
 
     @staticmethod
     def _process_directory_entries(directory_entries):
 
-        streams = {
-            "properties": {},
-            "recipients": {},
-            "attachments": {}
-        }
+        streams = {"properties": {}, "recipients": {}, "attachments": {}}
         for name, stream in directory_entries.items():
             # collect properties
             if "__substg1.0_" in name:
@@ -115,7 +113,9 @@ class Message(object):
             if isinstance(directory_entry, list):
                 directory_values = {}
                 for property_entry in directory_entry:
-                    property_data = self._get_property_data(directory_name, property_entry, is_list=True)
+                    property_data = self._get_property_data(
+                        directory_name, property_entry, is_list=True
+                    )
                     if property_data:
                         directory_values.update(property_data)
 
@@ -142,12 +142,14 @@ class Message(object):
             if isinstance(directory_entry, list):
                 directory_values = {}
                 for property_entry in directory_entry:
-                    property_data = self._get_property_data(directory_name, property_entry, is_list=True)
+                    property_data = self._get_property_data(
+                        directory_name, property_entry, is_list=True
+                    )
                     if property_data:
                         directory_values.update(property_data)
 
                 recipient_address = directory_values.get(
-                    'EmailAddress', directory_values.get('SmtpAddress', directory_name)
+                    "EmailAddress", directory_values.get("SmtpAddress", directory_name)
                 )
                 recipient_entries[recipient_address] = directory_values
             else:
@@ -178,10 +180,12 @@ class Message(object):
                         directory_values["EmbeddedMessage"] = {
                             "properties": embedded_message.properties,
                             "recipients": embedded_message.recipients,
-                            "attachments": embedded_message.attachments
+                            "attachments": embedded_message.attachments,
                         }
 
-                    property_data = self._get_property_data(directory_name, property_entry, is_list=True)
+                    property_data = self._get_property_data(
+                        directory_name, property_entry, is_list=True
+                    )
                     if property_data:
                         directory_values.update(property_data)
 
@@ -214,7 +218,9 @@ class Message(object):
             raw_content = ole_file.openstream(stream_name).read()
         except IOError:
             raw_content = None
-        property_value = self._data_model.get_value(raw_content, data_type=property_type)
+        property_value = self._data_model.get_value(
+            raw_content, data_type=property_type
+        )
 
         if property_value:
             property_detail = {property_name: property_value}
@@ -237,7 +243,9 @@ class Message(object):
         return None
 
     def __repr__(self):
-        return u'Message [%s]' % self.properties.get('InternetMessageId', self.properties.get("Subject"))
+        return "Message [%s]" % self.properties.get(
+            "InternetMessageId", self.properties.get("Subject")
+        )
 
 
 class Recipient(object):
@@ -254,7 +262,7 @@ class Recipient(object):
         self.RecipientType = recipients_properties.get("RecipientType")
 
     def __repr__(self):
-        return '%s (%s)' % (self.DisplayName, self.EmailAddress)
+        return "%s (%s)" % (self.DisplayName, self.EmailAddress)
 
 
 class Attachment(object):
@@ -278,13 +286,19 @@ class Attachment(object):
         if self.Filename:
             self.Filename = os.path.basename(self.Filename)
         else:
-            self.Filename = '[NoFilename_Method%s]' % self.AttachMethod
+            self.Filename = "[NoFilename_Method%s]" % self.AttachMethod
         self.data = attachment_properties.get("AttachDataObject")
-        self.AttachMimeTag = attachment_properties.get("AttachMimeTag", "application/octet-stream")
+        self.AttachMimeTag = attachment_properties.get(
+            "AttachMimeTag", "application/octet-stream"
+        )
         self.AttachExtension = attachment_properties.get("AttachExtension")
 
     def __repr__(self):
-        return '%s (%s / %s)' % (self.Filename, self.AttachmentSize, len(self.data or []))
+        return "%s (%s / %s)" % (
+            self.Filename,
+            self.AttachmentSize,
+            len(self.data or []),
+        )
 
 
 class MsOxMessage(object):
@@ -297,7 +311,9 @@ class MsOxMessage(object):
         self.include_attachment_data = False
 
         if not self.is_valid_msg_file():
-            raise Exception("Invalid file provided, please provide valid Microsoft’s Outlook MSG file.")
+            raise Exception(
+                "Invalid file provided, please provide valid Microsoft’s Outlook MSG file."
+            )
 
         with OleFileIO(msg_file_path) as ole_file:
             # process directory entries
@@ -412,7 +428,7 @@ class MsOxMessage(object):
         # Trying to decode body if is bytes obj. This is not the way to go. Quick-fix only.
         # See IMAP specs. Use charset-normalizer, cchardet or chardet as last resort.
         if isinstance(self.body, bytes):
-            self.body = self.body.decode('utf-8', 'ignore')
+            self.body = self.body.decode("utf-8", "ignore")
 
         if not self.body and "RtfCompressed" in property_values:
             try:
@@ -420,7 +436,7 @@ class MsOxMessage(object):
             except ImportError:
                 compressed_rtf = None
             if compressed_rtf:
-                compressed_rtf_body = property_values['RtfCompressed']
+                compressed_rtf_body = property_values["RtfCompressed"]
                 self.body = compressed_rtf.decompress(compressed_rtf_body)
 
     def _set_recipients(self):
@@ -453,14 +469,14 @@ class MsOxMessage(object):
         return True
 
 
-def format_size(num, suffix='B'):
+def format_size(num, suffix="B"):
     if not num:
         return "unknown"
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
+    return "%.1f%s%s" % (num, "Yi", suffix)
 
 
 def parse_email_headers(header, raw=False):
@@ -480,7 +496,9 @@ def parse_email_headers(header, raw=False):
     }
 
     for addr in email_address_headers.keys():
-        for (name, email_address) in email.utils.getaddresses(headers.get_all(addr, [])):
+        for (name, email_address) in email.utils.getaddresses(
+            headers.get_all(addr, [])
+        ):
             email_address_headers[addr].append("{} <{}>".format(name, email_address))
 
     parsed_headers = dict(headers)

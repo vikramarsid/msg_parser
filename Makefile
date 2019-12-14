@@ -32,24 +32,23 @@ help:
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
 clean-build: ## remove build artifacts
-	rm -fr build/
-	# rm -fr dist/
-	rm -fr .eggs/
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+	@rm -fr build/
+	@rm -fr .eggs/
+	@find . -name '*.egg-info' -exec rm -fr {} +
+	@find . -name '*.egg' -exec rm -f {} +
 
 clean-pyc: ## remove Python file artifacts
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
-	find . -name '__pycache__' -exec rm -fr {} +
+	@find . -name '*.pyc' -exec rm -f {} +
+	@find . -name '*.pyo' -exec rm -f {} +
+	@find . -name '*~' -exec rm -f {} +
+	@find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test: ## remove test and coverage artifacts
-	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
-	rm -fr .pytest_cache
-	rm -fr tests/files/*.eml
+	@rm -fr .tox/
+	@rm -f .coverage
+	@rm -fr htmlcov/
+	@rm -fr .pytest_cache
+	@rm -fr tests/files/*.eml
 
 lint: ## check style with flake8
 	flake8 msg_parser tests
@@ -90,3 +89,9 @@ install: clean ## install the package to the active Python's site-packages
 
 uninstall: clean ## install the package to the active Python's site-packages
 	pip uninstall msg-parser -y
+
+tidy: clean ## Run all formatting changes
+	isort -rc --atomic msg_parser
+	autoflake --in-place --remove-all-unused-imports --ignore-init-module-imports -r msg_parser
+	flake8
+	black -t py37 --verbose msg_parser

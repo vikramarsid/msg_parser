@@ -33,5 +33,5 @@ DATA_TYPE_MAP = {
     "0x101E": "PtypMultipleString8",
     "0x1040": "PtypMultipleTime",
     "0x1048": "PtypMultipleGuid",
-    "0x1102": "PtypMultipleBinary"
+    "0x1102": "PtypMultipleBinary",
 }
