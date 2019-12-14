@@ -3,7 +3,7 @@
 """ version file for msg_parser module"""
 __author__ = """Vikram Arsid"""
 __email__ = "vikramarsid@gmail.com"
-__version__ = "__version__ = '1.2.0'"
+__version__ = "1.2.0"
 
 __title__ = "msg_parser"
 __description__ = "This module enables reading, parsing and converting Microsoft Outlook MSG E-Mail files."
