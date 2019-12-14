@@ -12,3 +12,10 @@ History
 ------------------
 * Initial pypi release.
 * Added headers_dict to message object.
+
+1.2.0 (2019-12-12)
+------------------
+* Python 3.x support
+* Updates to Makefile
+* Formatting and linting
+
