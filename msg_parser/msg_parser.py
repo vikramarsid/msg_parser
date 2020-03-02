@@ -369,9 +369,9 @@ class MsOxMessage(object):
         email_obj = EmailFormatter(self)
         return email_obj.build_email()
 
-    def save_email_file(self, file_path):
+    def save_email_file(self, file_path, file_name=None):
         email_obj = EmailFormatter(self)
-        email_obj.save_file(file_path)
+        email_obj.save_file(file_path, file_name)
         return True
 
     def _set_properties(self):

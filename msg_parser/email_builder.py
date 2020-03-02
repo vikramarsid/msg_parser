@@ -81,11 +81,11 @@ class EmailFormatter(object):
 
         return composed
 
-    def save_file(self, file_path):
+    def save_file(self, file_path, file_name=None):
 
         eml_content = self.build_email()
 
-        file_name = str(self.message["Subject"]) + ".eml"
+        file_name = file_name if file_name is not None else str(self.message["Subject"]) + ".eml"
 
         eml_file_path = os.path.join(file_path, file_name)
 
