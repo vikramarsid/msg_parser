@@ -223,7 +223,12 @@ class Message(object):
         )
 
         if property_value:
-            property_detail = {property_name: property_value}
+            # If the propery is the data of the attachment it has to be provided raw to preven corruption
+            if property_name == 'AttachDataObject':
+                property_detail = {property_name: raw_content}
+            # Otherwhisle use the olefile lib to get the value
+            else:
+                property_detail = {property_name: property_value}
         else:
             property_detail = None
 
