@@ -104,10 +104,9 @@ class EmailFormatter(object):
             if data is None:
                 continue
 
-            if isinstance(data, bytes):
-                data = data.decode("utf-8", "ignore")
-
             if maintype == "text" or "message" in maintype:
+                if isinstance(data, bytes):
+                    data = data.decode("utf-8", "ignore")
                 attach = MIMEText(data, _subtype=subtype)
             elif maintype == "image":
                 attach = MIMEImage(data, _subtype=subtype)
