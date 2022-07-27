@@ -376,9 +376,8 @@ class MsOxMessage(object):
 
     def save_email_file(self, file_path, file_name=None):
         email_obj = EmailFormatter(self)
-        email_obj.save_file(file_path, file_name)
-        return True
-
+        return email_obj.save_file(file_path)
+        
     def _set_properties(self):
         property_values = self._message.properties
 

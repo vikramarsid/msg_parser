@@ -21,6 +21,18 @@ class EmailFormatter(object):
 
         # Setting Message ID
         self.message.set_param("Message-ID", self.msg_obj.message_id)
+        
+        message_ID = self.msg_obj.message_id
+        if message_ID:
+            self.message["Message-ID"] = str(message_ID)
+        
+        references = self.msg_obj.header_dict.get("References")
+        if references:
+            self.message["References"] = str(references)
+        
+        in_reply_to = self.msg_obj.header_dict.get("In-Reply-To")
+        if in_reply_to:
+            self.message["In-Reply-To"] = str(in_reply_to)
 
         # Encoding for unicode subject
         self.message["Subject"] = Header(self.msg_obj.subject, charset="UTF-8")
