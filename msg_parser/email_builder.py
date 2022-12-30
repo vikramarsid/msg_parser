@@ -57,7 +57,7 @@ class EmailFormatter(object):
         # Required Email body content
         body_content = self.msg_obj.body
         if body_content:
-            if "<html>" in body_content:
+            if "<html" in body_content:
                 body_type = "html"
             else:
                 body_type = "plain"
