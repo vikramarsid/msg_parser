@@ -233,6 +233,24 @@ class TestDataModelsPython3Compatibility(unittest.TestCase):
         self.assertEqual(offsets[:-1], offset_values)  # Last offset is length of data
         self.assertEqual(offsets[-1], len(test_value))
     
+    def test_ptyp_binary_preserves_null_bytes(self):
+        """PtypBinary must return binary data unchanged, including embedded
+        null bytes.
+
+        Null bytes are significant content in binary properties (0x0102), not
+        string padding. The PR_RTF_COMPRESSED body stream in particular carries
+        legitimate 0x00 bytes in its LZFu header and compressed payload;
+        stripping them shifts the header and makes compressed_rtf raise
+        "Unknown type of RTF compression!". Upstream still strips here, so this
+        guards against the bug being reintroduced on a re-sync.
+        """
+        # Shape mirrors a real LZFu compressed-RTF header (length, 'LZFu' magic
+        # at offset 8, CRC) -- full of meaningful null bytes.
+        value = b"\x85\x00\x00\x00\x09\x01\x00\x00LZFu\x21\x00\x21\xb4\x00\x00"
+        result = self.data_model.PtypBinary(value)
+        self.assertEqual(result, value)
+        self.assertEqual(result.count(b"\x00"), value.count(b"\x00"))
+
     def test_get_value_with_data_type_name(self):
         """Test get_value method using data_type_name parameter."""
         # Test with PtypInteger32

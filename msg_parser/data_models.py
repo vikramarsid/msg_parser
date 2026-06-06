@@ -117,8 +117,12 @@ class DataModel(object):
 
     @staticmethod
     def PtypBinary(data_value):
-        if data_value and b"\x00" in data_value:
-            data_value = data_value.replace(b"\x00", b"")
+        # PtypBinary (0x0102) is raw binary data: null bytes are significant
+        # content, not string padding. Stripping them corrupts the value -- most
+        # visibly the RtfCompressed body stream, whose LZFu header and compressed
+        # payload contain legitimate 0x00 bytes. Removing them shifts the header
+        # and makes compressed_rtf raise "Unknown type of RTF compression!".
+        # Return the bytes untouched.
         return data_value
 
     @staticmethod

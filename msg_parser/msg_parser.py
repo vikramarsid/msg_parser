@@ -442,7 +442,21 @@ class MsOxMessage(object):
                 compressed_rtf = None
             if compressed_rtf:
                 compressed_rtf_body = property_values["RtfCompressed"]
-                self.body = compressed_rtf.decompress(compressed_rtf_body)
+                decompressed = compressed_rtf.decompress(compressed_rtf_body)
+                # decompress() returns raw bytes of RTF markup. Decode to text and
+                # extract the plain-text body so downstream consumers get a string
+                # (consistent with the Html/Body branches above), not RTF source.
+                if isinstance(decompressed, bytes):
+                    decompressed = decompressed.decode("utf-8", "ignore")
+                try:
+                    from striprtf.striprtf import rtf_to_text
+
+                    # RTF-only emails are frequently delivered as a formatting
+                    # shell with no real text (the content lives in attachments);
+                    # rtf_to_text collapses those to an empty/whitespace string.
+                    self.body = rtf_to_text(decompressed)
+                except ImportError:
+                    self.body = decompressed
 
     def _set_recipients(self):
         recipients = self._message.recipients

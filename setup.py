@@ -60,6 +60,6 @@ setup(
     tests_require=test_requirements,
     zip_safe=False,
     extras_require={
-        'rtf': ['compressed_rtf >= 1.0.5'],
+        'rtf': ['compressed_rtf >= 1.0.5', 'striprtf >= 0.0.32'],
     },
 )
